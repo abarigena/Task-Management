@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+jwt:
+  secret: bWFuZG9yaWFudGV4dHJlbWVseXNlY3VyZXQyMTEzJDEyMzQ1

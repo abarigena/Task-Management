@@ -1,0 +1,6 @@
+server:
+  port: 8010
+
+jwt:
+  secret: bWFuZG9yaWFudGV4dHJlbWVseXNlY3VyZXQyMTEzJDEyMzQ1
+  expiration: 86400 # 24 hours in milliseconds
