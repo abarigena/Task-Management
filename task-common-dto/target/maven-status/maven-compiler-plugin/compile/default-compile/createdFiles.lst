@@ -1,0 +1,6 @@
+com\abarigena\dto\AuthRequestDto.class
+com\abarigena\dto\UserDto.class
+com\abarigena\dto\AuthResponseDto.class
+com\abarigena\dto\RegisterRequestDto.class
+com\abarigena\dto\AuthRequest.class
+com\abarigena\dto\EmailAuthRequestDto.class
