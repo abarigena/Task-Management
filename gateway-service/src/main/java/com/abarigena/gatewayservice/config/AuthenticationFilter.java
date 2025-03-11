@@ -1,6 +1,8 @@
 package com.abarigena.gatewayservice.config;
 
 import com.abarigena.gatewayservice.service.JwtUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -17,6 +19,8 @@ import reactor.core.publisher.Mono;
 @Component
 public class AuthenticationFilter implements GatewayFilter {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
+
     @Autowired
     private RouterValidator validator;
     @Autowired
@@ -26,51 +30,66 @@ public class AuthenticationFilter implements GatewayFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
 
+        logger.info("Запрос получен: {} {}", request.getMethod(), request.getURI().getPath());
+
         if (validator.isSecured.test(request)) {
+            logger.debug("Обработка защищенного эндпоинта: {}", request.getURI().getPath());
+
             if (authMissing(request)) {
+                logger.warn("Отказано в доступе: отсутствует заголовок авторизации");
                 return onError(exchange, HttpStatus.UNAUTHORIZED);
             }
 
             final String token = request.getHeaders().getOrEmpty("Authorization").get(0);
 
-            // Проверяем формат Bearer токена
             if (!token.startsWith("Bearer ")) {
+                logger.warn("Отказано в доступе: неверный формат токена");
                 return onError(exchange, HttpStatus.UNAUTHORIZED);
             }
 
-            // Удаляем префикс "Bearer " из токена
             String jwtToken = token.substring(7);
 
             if (jwtUtils.isExpired(jwtToken)) {
+                logger.warn("Отказано в доступе: токен истёк");
                 return onError(exchange, HttpStatus.UNAUTHORIZED);
             }
 
             // Добавляем данные из токена в заголовки запроса
-            addAuthorizationHeaders(exchange, jwtToken);
+            return addAuthorizationHeaders(exchange, jwtToken, chain);
         }
+
+        logger.debug("Запрос к публичному эндпоинту: {}", request.getURI().getPath());
         return chain.filter(exchange);
     }
 
-    private void addAuthorizationHeaders(ServerWebExchange exchange, String token) {
+    private Mono<Void> addAuthorizationHeaders(ServerWebExchange exchange, String token, GatewayFilterChain chain) {
         try {
             String userId = jwtUtils.getClaims(token).getSubject();
             String role = jwtUtils.getClaims(token).get("role", String.class);
 
-            // Добавляем данные пользователя в заголовки запроса для микросервисов
+            logger.debug("Добавление заголовков авторизации для пользователя ID: {}, роль: {}", userId, role);
+
+            // Создаем новый запрос с добавленными заголовками
             ServerHttpRequest request = exchange.getRequest().mutate()
                     .header("X-User-Id", userId)
                     .header("X-User-Role", role)
+                    .header("Authorization", "Bearer " + token) // Сохраняем оригинальный токен
                     .build();
 
-            exchange.mutate().request(request).build();
+            ServerWebExchange mutatedExchange = exchange.mutate().request(request).build();
+
+            return chain.filter(mutatedExchange);
         } catch (Exception e) {
-            // Ошибка при получении данных из токена
+
+            System.err.println("Ошибка при обработке JWT токена: " + e.getMessage());
+            return onError(exchange, HttpStatus.UNAUTHORIZED);
         }
     }
 
     private Mono<Void> onError(ServerWebExchange exchange, HttpStatus httpStatus) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(httpStatus);
+        logger.warn("Возвращаем ответ с кодом: {}", httpStatus);
         return response.setComplete();
     }
 

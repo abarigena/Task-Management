@@ -6,11 +6,15 @@ import com.abarigena.dto.AuthResponse;
 import com.abarigena.dto.LoginRequest;
 import com.abarigena.dto.UserDto;
 import org.mindrot.jbcrypt.BCrypt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     private final UserServiceClient userServiceClient;
     private final JwtUtil jwtUtil;
@@ -22,45 +26,64 @@ public class AuthService {
     }
 
     public void register(AuthRequest request) {
+        logger.info("Начало процесса регистрации пользователя с email: {}", request.getEmail());
+
         String hashedPassword = BCrypt.hashpw(request.getPassword(), BCrypt.gensalt());
         request.setPassword(hashedPassword);
 
-        // Регистрация пользователя без выдачи токена
-        userServiceClient.registerUser(request);
+        try {
+            userServiceClient.registerUser(request);
+            logger.info("Пользователь успешно зарегистрирован: {}", request.getEmail());
+        } catch (Exception e) {
+            logger.error("Ошибка при регистрации пользователя {}: {}", request.getEmail(), e.getMessage());
+            throw e;
+        }
     }
 
     public AuthResponse login(LoginRequest request) {
-        // Получаем информацию о пользователе
-        UserDto user = userServiceClient.findByEmail(request.getEmail());
+        logger.info("Попытка входа пользователя: {}", request.getEmail());
+
+        UserDto user;
+        try {
+            user = userServiceClient.findByEmail(request.getEmail());
+            logger.debug("Пользователь найден в базе данных: {}", request.getEmail());
+        } catch (Exception e) {
+            logger.error("Ошибка при поиске пользователя {}: {}", request.getEmail(), e.getMessage());
+            throw new RuntimeException("Ошибка при авторизации: " + e.getMessage());
+        }
 
         // Проверяем пароль
         if (!BCrypt.checkpw(request.getPassword(), user.getPassword())) {
+            logger.warn("Неверный пароль для пользователя: {}", request.getEmail());
             throw new RuntimeException("Invalid email or password");
         }
 
-        // Используем роли пользователя для создания токена
         String roles = String.join(",", user.getRoles());
 
+        logger.debug("Генерация токенов для пользователя: {} с ролями: {}", user.getId(), roles);
         String accessToken = jwtUtil.generate(user.getId(), roles, "ACCESS");
         String refreshToken = jwtUtil.generate(user.getId(), roles, "REFRESH");
 
+        logger.info("Пользователь успешно вошел в систему: {}", request.getEmail());
         return new AuthResponse(accessToken, refreshToken);
     }
 
     public AuthResponse refreshToken(String refreshToken) {
-        // Проверяем, что токен не истёк
+        logger.info("Запрос на обновление токена");
+
         if (jwtUtil.isExpired(refreshToken)) {
             throw new RuntimeException("Refresh token expired");
         }
 
-        // Получаем данные из токена
         String userId = jwtUtil.getClaims(refreshToken).getSubject();
         String role = jwtUtil.getClaims(refreshToken).get("role", String.class);
 
-        // Генерируем новые токены
+        logger.debug("Обновление токена для пользователя: {} с ролью: {}", userId, role);
+
         String newAccessToken = jwtUtil.generate(userId, role, "ACCESS");
         String newRefreshToken = jwtUtil.generate(userId, role, "REFRESH");
 
+        logger.info("Токены успешно обновлены для пользователя: {}", userId);
         return new AuthResponse(newAccessToken, newRefreshToken);
     }
 

@@ -32,7 +32,6 @@ public class AuthController {
 
     @PostMapping(value = "/refresh")
     public ResponseEntity<AuthResponse> refreshToken(@RequestHeader("Authorization") String token) {
-        // Убираем префикс "Bearer " из токена
         String refreshToken = token.replace("Bearer ", "");
         return ResponseEntity.ok(authService.refreshToken(refreshToken));
     }
