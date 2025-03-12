@@ -1,0 +1,23 @@
+server:
+  port: 8013
+
+spring:
+  datasource:
+    username: postgres
+    password: hgfhgf2233
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/taskdb
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+springdoc:
+  swagger-ui:
+    urls:
+      - url: /v3/api-docs
+        name: TASK Service
+  api-docs:
+    enabled: true

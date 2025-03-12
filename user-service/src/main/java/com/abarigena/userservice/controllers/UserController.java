@@ -1,6 +1,7 @@
 package com.abarigena.userservice.controllers;
 
 import com.abarigena.dto.UserDto;
+import com.abarigena.dto.UserInfoDto;
 import com.abarigena.userservice.security.SecurityUtils;
 import com.abarigena.userservice.service.UserService;
 import org.slf4j.Logger;
@@ -58,5 +59,12 @@ public class UserController {
         String userId = SecurityUtils.getCurrentUserId();
         logger.info("Запрос профиля пользователя с ID: {}", userId);
         return ResponseEntity.ok("Профиль пользователя с ID: " + userId);
+    }
+
+    @GetMapping("/info/{userId}")
+    public ResponseEntity<UserInfoDto> getUserInfo(@PathVariable String userId) {
+        logger.info("Получение информации о пользователе с ID: {}", userId);
+        UserInfoDto userDto = userService.findById(userId);
+        return ResponseEntity.ok(userDto);
     }
 }

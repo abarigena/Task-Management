@@ -1,4 +1,4 @@
-package com.abarigena.userservice.security;
+package com.abarigena.taskservice.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,15 +20,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        // Разрешаем сервисной роли доступ к API регистрации и поиска пользователей
-                        .requestMatchers("/users").hasAnyRole("SERVICE", "ADMIN")
-                        .requestMatchers("/users/{email}").hasAnyRole("SERVICE", "ADMIN")
-                        .requestMatchers("/info/{userId}").hasAnyRole("SERVICE", "ADMIN")
-                        .requestMatchers("/public/**").permitAll()
-                        .requestMatchers("/users/profile").authenticated()
-                        // Защищенные эндпоинты
-                        .requestMatchers("/users/secured/**").hasRole("ADMIN")
-                        // Все остальные запросы требуют аутентификации
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(formLogin -> formLogin.disable())

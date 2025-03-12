@@ -20,6 +20,9 @@ public class GatewayConfig {
                 .route("authenthication-service", r -> r.path("/auth/**")
                         .filters(f -> f.filter(filter))
                         .uri("lb://authenthication-service"))
+                .route("task-service", r -> r.path("/tasks/**")
+                        .filters(f -> f.filter(filter))
+                        .uri("lb://task-service"))
                 .build();
     }
 }

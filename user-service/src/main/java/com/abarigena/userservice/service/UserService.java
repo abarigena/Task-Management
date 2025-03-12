@@ -1,12 +1,14 @@
 package com.abarigena.userservice.service;
 
 import com.abarigena.dto.UserDto;
+import com.abarigena.dto.UserInfoDto;
 import com.abarigena.userservice.entity.Role;
 import com.abarigena.userservice.entity.User;
 import com.abarigena.userservice.repository.RoleRepository;
 import com.abarigena.userservice.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,5 +102,12 @@ public class UserService {
         user.setRoles(roles);
 
         userRepository.save(user);
+    }
+
+    public UserInfoDto findById(String userId) {
+        User user = userRepository.findById(Long.valueOf(userId))
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден с ID: " + userId));
+
+        return new UserInfoDto(String.valueOf(user.getId()), user.getUsername(), user.getEmail());
     }
 }
