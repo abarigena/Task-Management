@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.Set;
+
 @Data
 public class CreateTaskRequest {
     @NotBlank(message = "Title cannot be empty")
@@ -15,5 +17,5 @@ public class CreateTaskRequest {
     @NotNull(message = "Priority must be specified")
     private Task.TaskPriority priority;
 
-    private String assigneeId;
+    private Set<String> assigneeIds;
 }

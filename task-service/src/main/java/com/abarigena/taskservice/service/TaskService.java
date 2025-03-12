@@ -41,6 +41,12 @@ public class TaskService {
 
     @Transactional(readOnly = true)
     public Page<TaskDto> findTasks(TaskFilterRequest filterRequest) {
+
+        log.debug("Фильтры: authorId={}, status={}, priority={}",
+                filterRequest.getAuthorId(),
+                filterRequest.getStatus(),
+                filterRequest.getPriority());
+
         Pageable pageable = PageRequest.of(
                 filterRequest.getPage(),
                 filterRequest.getSize(),
@@ -60,6 +66,22 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
+    public Page<TaskDto> findTasksByAuthor(String authorId, Pageable pageable) {
+        log.info("Поиск задач по автору: {}", authorId);
+        Page<Task> tasks = taskRepository.findByAuthorId(authorId, pageable);
+        log.info("Найдено {} задач для автора {}", tasks.getTotalElements(), authorId);
+        return tasks.map(this::convertToTaskDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TaskDto> findTasksByAssignee(String assigneeId, Pageable pageable) {
+        log.info("Поиск задач по исполнителю: {}", assigneeId);
+        Page<Task> tasks = taskRepository.findByAssigneeId(assigneeId, pageable);
+        log.info("Найдено {} задач для исполнителя {}", tasks.getTotalElements(), assigneeId);
+        return tasks.map(this::convertToTaskDto);
+    }
+
+    @Transactional(readOnly = true)
     public TaskDto findTaskById(Long taskId) {
         log.info("Поиск задачи по ID: {}", taskId);
         Task task = getTaskById(taskId);
@@ -70,15 +92,25 @@ public class TaskService {
     @Transactional
     public TaskDto createTask(CreateTaskRequest request) {
         String currentUserId = SecurityUtils.getCurrentUserId();
+        log.info("Создание новой задачи пользователем: {}", currentUserId);
+        log.debug("Параметры задачи: название={}, приоритет={}, количество исполнителей={}",
+                request.getTitle(), request.getPriority(),
+                request.getAssigneeIds() != null ? request.getAssigneeIds().size() : 0);
 
-        Task task = Task.builder()
+        Task.TaskBuilder taskBuilder = Task.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .status(Task.TaskStatus.PENDING)
                 .priority(request.getPriority())
-                .authorId(currentUserId)
-                .assigneeId(request.getAssigneeId())
-                .build();
+                .authorId(currentUserId);
+
+        // Добавляем исполнителей, если они указаны
+        if (request.getAssigneeIds() != null && !request.getAssigneeIds().isEmpty()) {
+            request.getAssigneeIds().forEach(taskBuilder::addAssigneeId);
+            log.info("Добавлены исполнители: {}", request.getAssigneeIds());
+        }
+
+        Task task = taskBuilder.build();
 
         Task savedTask = taskRepository.save(task);
         log.info("Задача успешно создана с ID: {}", savedTask.getId());
@@ -96,7 +128,7 @@ public class TaskService {
 
         boolean isAdmin = SecurityUtils.hasRole("ROLE_ADMIN");
         boolean isAuthor = task.getAuthorId().equals(currentUserId);
-        boolean isAssignee = task.getAssigneeId() != null && task.getAssigneeId().equals(currentUserId);
+        boolean isAssignee = task.getAssigneeIds().contains(currentUserId);
         log.debug("Права пользователя: admin={}, автор={}, исполнитель={}", isAdmin, isAuthor, isAssignee);
 
         // Если пользователь - исполнитель, он может обновлять только статус
@@ -128,8 +160,10 @@ public class TaskService {
                 log.debug("Обновление приоритета задачи с '{}' на '{}'", task.getPriority(), request.getPriority());
                 task.setPriority(request.getPriority());
             }
-            if (request.getAssigneeId() != null) {
-                task.setAssigneeId(request.getAssigneeId());
+            if (request.getAssigneeIds() != null) {
+                log.debug("Обновление списка исполнителей с {} на {}",
+                        task.getAssigneeIds(), request.getAssigneeIds());
+                task.setAssigneeIds(request.getAssigneeIds());
             }
             log.info("Задача обновлена пользователем {}: {}",
                     isAdmin ? "админ" : "автор", currentUserId);
@@ -150,7 +184,6 @@ public class TaskService {
 
         Task task = getTaskById(taskId);
 
-        // Только админ или автор задачи может удалить её
         boolean isAdmin = SecurityUtils.hasRole("ROLE_ADMIN");
         boolean isAuthor = task.getAuthorId().equals(currentUserId);
 
@@ -208,12 +241,20 @@ public class TaskService {
     }
 
     private TaskDto convertToTaskDto(Task task) {
-        List<CommentDto> commentDtos = Optional.ofNullable(task.getComments()).orElse(Collections.emptyList()).stream()
+        log.debug("Конвертация задачи в DTO: {}", task.getId());
+
+        List<CommentDto> commentDtos = Optional.ofNullable(task.getComments())
+                .orElse(Collections.emptyList())
+                .stream()
                 .map(this::convertToCommentDto)
                 .collect(Collectors.toList());
 
         String authorUsername = getUsernameById(task.getAuthorId());
-        String assigneeUsername = task.getAssigneeId() != null ? getUsernameById(task.getAssigneeId()) : null;
+
+        Map<String, String> assigneeUsernames = new HashMap<>();
+        for (String assigneeId : task.getAssigneeIds()) {
+            assigneeUsernames.put(assigneeId, getUsernameById(assigneeId));
+        }
 
         return TaskDto.builder()
                 .id(task.getId())
@@ -223,8 +264,8 @@ public class TaskService {
                 .priority(task.getPriority())
                 .authorId(task.getAuthorId())
                 .authorUsername(authorUsername)
-                .assigneeId(task.getAssigneeId())
-                .assigneeUsername(assigneeUsername)
+                .assigneeIds(task.getAssigneeIds())
+                .assigneeUsernames(assigneeUsernames)
                 .createdAt(task.getCreatedAt())
                 .updatedAt(task.getUpdatedAt())
                 .comments(commentDtos)
@@ -232,6 +273,7 @@ public class TaskService {
     }
 
     private CommentDto convertToCommentDto(Comment comment) {
+        log.debug("Конвертация комментария в DTO: {}", comment.getId());
         String authorUsername = getUsernameById(comment.getAuthorId());
 
         return CommentDto.builder()

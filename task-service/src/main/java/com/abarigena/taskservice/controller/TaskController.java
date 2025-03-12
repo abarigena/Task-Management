@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,7 +32,7 @@ public class TaskController {
 
     @GetMapping
     @Operation(summary = "Получить все задачи с фильтрацией")
-    public ResponseEntity<Page<TaskDto>> getTasks(TaskFilterRequest filterRequest) {
+    public ResponseEntity<Page<TaskDto>> getTasks(@RequestBody TaskFilterRequest filterRequest) {
         Page<TaskDto> tasks = taskService.findTasks(filterRequest);
         return ResponseEntity.ok(tasks);
     }
@@ -39,6 +42,42 @@ public class TaskController {
     public ResponseEntity<TaskDto> getTaskById(@PathVariable Long taskId) {
         TaskDto task = taskService.findTaskById(taskId);
         return ResponseEntity.ok(task);
+    }
+
+    @GetMapping("/by-author/{authorId}")
+    @Operation(summary = "Получить задачи по ID автора")
+    public ResponseEntity<Page<TaskDto>> getTasksByAuthor(
+            @PathVariable String authorId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+
+        Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ?
+                Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Page<TaskDto> tasks = taskService.findTasksByAuthor(authorId, pageable);
+
+        return ResponseEntity.ok(tasks);
+    }
+
+    @GetMapping("/by-assignee/{assigneeId}")
+    @Operation(summary = "Получить задачи по ID исполнителя")
+    public ResponseEntity<Page<TaskDto>> getTasksByAssignee(
+            @PathVariable String assigneeId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+
+        Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ?
+                Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Page<TaskDto> tasks = taskService.findTasksByAssignee(assigneeId, pageable);
+
+        return ResponseEntity.ok(tasks);
     }
 
     @PostMapping("/create")

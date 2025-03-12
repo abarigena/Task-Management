@@ -9,11 +9,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long>  {
     Page<Task> findByAuthorId(String authorId, Pageable pageable);
+
+    @Query("SELECT t FROM Task t JOIN t.assigneeIds a WHERE a = :assigneeId")
     Page<Task> findByAssigneeId(String assigneeId, Pageable pageable);
 
     @Query("SELECT t FROM Task t WHERE " +
             "(:authorId IS NULL OR t.authorId = :authorId) AND " +
-            "(:assigneeId IS NULL OR t.assigneeId = :assigneeId) AND " +
+            "(:assigneeId IS NULL OR :assigneeId IN (SELECT a FROM t.assigneeIds a)) AND " +
             "(:status IS NULL OR t.status = :status) AND " +
             "(:priority IS NULL OR t.priority = :priority)")
     Page<Task> findByFilters(

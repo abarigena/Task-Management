@@ -14,10 +14,3 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-springdoc:
-  swagger-ui:
-    urls:
-      - url: /v3/api-docs
-        name: TASK Service
-  api-docs:
-    enabled: true
