@@ -7,7 +7,7 @@
 ### 1. Клонируйте репозиторий
 
 ```bash
-git clone https://github.com/your-username/task-management.git
+git clone https://github.com/abarigena/Task-Management.git
 cd task-management
 ```
 
