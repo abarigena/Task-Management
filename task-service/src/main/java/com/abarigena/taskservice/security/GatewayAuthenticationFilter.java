@@ -1,5 +1,6 @@
 package com.abarigena.taskservice.security;
 
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,10 +27,47 @@ public class GatewayAuthenticationFilter extends OncePerRequestFilter {
     private static final String USER_ROLE_HEADER = "X-User-Role";
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/api-docs") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-ui") ||
+                path.contains("swagger-ui.html") ||
+                path.contains("swagger-resources") ||
+                path.startsWith("/webjars") /*||
+                path.contains("/task-service/v3/api-docs") ||
+                path.contains("/task-service/swagger-ui")*/;
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         logger.debug("Обработка запроса к: {}", request.getRequestURI());
+
+        /*String path = request.getRequestURI();
+        // Если это запрос к документации Swagger, и заголовки отсутствуют, добавляем их сами
+        if ((path.contains("/v3/api-docs") || path.contains("/swagger-ui")) &&
+                request.getHeader(USER_ID_HEADER) == null) {
+
+            logger.info("Добавление заголовков аутентификации для Swagger");
+
+            // Используем HttpServletRequestWrapper для добавления заголовков
+            HttpServletRequest modifiedRequest = new HttpServletRequestWrapper(request) {
+                @Override
+                public String getHeader(String name) {
+                    if (USER_ID_HEADER.equals(name)) {
+                        return "swagger-user";
+                    } else if (USER_ROLE_HEADER.equals(name)) {
+                        return "ROLE_ADMIN";
+                    }
+                    return super.getHeader(name);
+                }
+            };
+
+            filterChain.doFilter(modifiedRequest, response);
+            return;
+        }*/
 
         // Проверяем заголовок для межсервисной коммуникации
         String serviceAuth = request.getHeader("X-Service-Auth");

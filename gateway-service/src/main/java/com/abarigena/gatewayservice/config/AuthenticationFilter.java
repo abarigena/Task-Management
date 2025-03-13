@@ -32,6 +32,17 @@ public class AuthenticationFilter implements GatewayFilter {
 
         logger.info("Запрос получен: {} {}", request.getMethod(), request.getURI().getPath());
 
+        /*String path = request.getURI().getPath();
+        if (path.contains("/v3/api-docs") ||
+                path.contains("/swagger-ui") ||
+                path.contains("/swagger-resources") ||
+                path.contains("/webjars") ||
+                path.contains("/task-service/v3/api-docs") ||
+                path.contains("/task-service/swagger-ui")) {
+            logger.debug("Skipping authentication for Swagger endpoint: {}", path);
+            return chain.filter(exchange);
+        }*/
+
         if (validator.isSecured.test(request)) {
             logger.debug("Обработка защищенного эндпоинта: {}", request.getURI().getPath());
 

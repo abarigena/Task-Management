@@ -14,6 +14,34 @@ public class GatewayConfig {
     @Bean
     public RouteLocator routes(RouteLocatorBuilder builder) {
         return builder.routes()
+                // Для документации API
+                .route("task-service-api-docs", r -> r
+                        .path("/task-service/v3/api-docs")
+                        .filters(f -> f
+                                .stripPrefix(1))
+                        .uri("lb://task-service"))
+
+                // Для UI Swagger
+                .route("task-service-swagger-ui", r -> r
+                        .path("/task-service/swagger-ui/**")
+                        .filters(f -> f
+                                .stripPrefix(1))
+                        .uri("lb://task-service"))
+
+                // Для документации API
+                .route("user-service-api-docs", r -> r
+                        .path("/user-service/v3/api-docs")
+                        .filters(f -> f
+                                .stripPrefix(1))
+                        .uri("lb://user-service"))
+
+                // Для UI Swagger
+                .route("user-service-swagger-ui", r -> r
+                        .path("/user-service/swagger-ui/**")
+                        .filters(f -> f
+                                .stripPrefix(1))
+                        .uri("lb://user-service"))
+
                 .route("user-service", r -> r.path("/users/**")
                         .filters(f -> f.filter(filter))
                         .uri("lb://user-service"))
@@ -23,6 +51,13 @@ public class GatewayConfig {
                 .route("task-service", r -> r.path("/tasks/**")
                         .filters(f -> f.filter(filter))
                         .uri("lb://task-service"))
+
+                // Auth Service Swagger
+                .route("auth-service-swagger-ui", r -> r.path("/auth-service/swagger-ui/**")
+                        .uri("lb://authenthication-service/swagger-ui/"))
+                .route("auth-service-api-docs", r -> r.path("/auth-service/v3/api-docs/**")
+                        .uri("lb://authenthication-service/v3/api-docs"))
+
                 .build();
     }
 }

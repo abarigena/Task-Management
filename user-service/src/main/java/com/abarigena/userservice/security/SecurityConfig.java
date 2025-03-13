@@ -14,17 +14,29 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+    private static final String[] SWAGGER_WHITELIST = {
+            "/v3/api-docs/**",
+            "/v3/api-docs/",
+            "/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/swagger-resources/**",
+            "/webjars/**"/*,
+            "/task-service/v3/api-docs",
+            "/task-service/swagger-ui"*/
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         // Разрешаем сервисной роли доступ к API регистрации и поиска пользователей
                         .requestMatchers("/users").hasAnyRole("SERVICE", "ADMIN")
                         .requestMatchers("/users/{email}").hasAnyRole("SERVICE", "ADMIN")
                         .requestMatchers("/info/{userId}").hasAnyRole("SERVICE", "ADMIN")
-                        .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/users/profile").authenticated()
                         // Защищенные эндпоинты
                         .requestMatchers("/users/secured/**").hasRole("ADMIN")

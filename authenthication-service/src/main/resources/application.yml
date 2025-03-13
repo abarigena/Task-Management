@@ -4,3 +4,13 @@ server:
 jwt:
   secret: bWFuZG9yaWFudGV4dHJlbWVseXNlY3VyZXQyMTEzJDEyMzQ1
   expiration: 86400 # 24 hours in milliseconds
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
+  default-produces-media-type: application/json
+  paths-to-match: /auth/**

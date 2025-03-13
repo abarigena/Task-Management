@@ -26,6 +26,19 @@ public class GatewayAuthenticationFilter extends OncePerRequestFilter {
     private static final String USER_ROLE_HEADER = "X-User-Role";
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/api-docs") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-ui") ||
+                path.contains("swagger-ui.html") ||
+                path.contains("swagger-resources") ||
+                path.startsWith("/webjars") /*||
+                path.contains("/task-service/v3/api-docs") ||
+                path.contains("/task-service/swagger-ui")*/;
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
