@@ -23,7 +23,6 @@ public interface TaskRepository extends JpaRepository<Task, Long>  {
             String assigneeId,
             Task.TaskStatus status,
             Task.TaskPriority priority,
-            String searchQuery, // Не используется в запросе
             Pageable pageable
     );
 }

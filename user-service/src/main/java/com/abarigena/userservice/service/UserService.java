@@ -110,4 +110,10 @@ public class UserService {
 
         return new UserInfoDto(String.valueOf(user.getId()), user.getUsername(), user.getEmail());
     }
+
+    public UserDto getCurrentUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден с ID: " + userId));
+        return convertToDto(user);
+    }
 }

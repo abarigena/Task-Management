@@ -58,7 +58,6 @@ public class TaskService {
                 filterRequest.getAssigneeId(),
                 filterRequest.getStatus(),
                 filterRequest.getPriority(),
-                filterRequest.getSearchQuery(),
                 pageable
         );
 

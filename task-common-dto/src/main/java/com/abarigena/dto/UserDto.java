@@ -102,4 +102,14 @@ public class UserDto {
             return new UserDto(id, email, password, username, roles);
         }
     }
+
+    @Override
+    public String toString() {
+        return "UserDto{" +
+                "id='" + id + '\'' +
+                ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", roles=" + roles +
+                '}';
+    }
 }
