@@ -1,10 +1,49 @@
+spring:
+  profiles:
+    active: ${ACTIVE_PROFILE:local}
+
 server:
   port: 8000
 
+---
 spring:
+  config:
+    activate:
+      on-profile: local
   cloud:
     config:
       server:
         git:
           uri: https://github.com/abarigena/task-config-server.git
           clone-on-start: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    instance-id: config-instance-${random.uuid}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/abarigena/task-config-server.git
+          clone-on-start: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka
+  instance:
+    instance-id: config-instance-${random.uuid}
+    prefer-ip-address: true

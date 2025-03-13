@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: hgfhgf2233
+      POSTGRES_MULTIPLE_DATABASES: taskdb,userdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-multiple-db.sh:/docker-entrypoint-initdb.d/init-multiple-db.sh
+    ports:
+      - "5432:5432"
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  discovery-service:
+    image: discovery-service:latest
+    container_name: discovery-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: always
+
+  config-service:
+    image: config-service:latest
+    container_name: config-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8000:8000"
+    networks:
+      - microservices-network
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  authenthication-service:
+    image: authenthication-service:latest
+    container_name: authenthication-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8001
+      - JWT_SECRET=bWFuZG9yaWFudGV4dHJlbWVseXNlY3VyZXQyMTEzJDEyMzQ1
+    ports:
+      - "8010:8010"
+    networks:
+      - microservices-network
+    depends_on:
+      config-service:
+        condition: service_healthy
+    restart: always
+
+  user-service:
+    image: user-service:latest
+    container_name: user-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8001
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_DATASOURCE_USER=${POSTGRES_USER}
+    ports:
+      - "8011:8011"
+    networks:
+      - microservices-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    restart: always
+
+  task-service:
+    image: task-service:latest
+    container_name: task-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8001
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_DATASOURCE_USER=${POSTGRES_USER}
+    ports:
+      - "8013:8013"
+    networks:
+      - microservices-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+    restart: always
+
+  gateway-service:
+    image: gateway-service:latest
+    container_name: gateway-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-service:8001
+      - JWT_SECRET=bWFuZG9yaWFudGV4dHJlbWVseXNlY3VyZXQyMTEzJDEyMzQ1
+    ports:
+      - "8080:8080"
+    networks:
+      - microservices-network
+    depends_on:
+      config-service:
+        condition: service_healthy
+      authenthication-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+      task-service:
+        condition: service_started
+    restart: always
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  postgres-data:

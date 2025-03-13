@@ -1,8 +1,12 @@
+spring:
+  profiles:
+    active: ${ACTIVE_PROFILE:local}
+
 server:
   port: 8010
 
 jwt:
-  secret: bWFuZG9yaWFudGV4dHJlbWVseXNlY3VyZXQyMTEzJDEyMzQ1
+  secret: ${JWT_SECRET:bWFuZG9yaWFudGV4dHJlbWVseXNlY3VyZXQyMTEzJDEyMzQ1}
   expiration: 86400 # 24 hours in milliseconds
 
 springdoc:
@@ -14,3 +18,30 @@ springdoc:
     path: /swagger-ui
   default-produces-media-type: application/json
   paths-to-match: /auth/**
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    instance-id: auth-instance-${random.uuid}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka
+  instance:
+    instance-id: auth-instance-${random.uuid}
+    prefer-ip-address: true

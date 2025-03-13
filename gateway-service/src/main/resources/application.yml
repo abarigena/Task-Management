@@ -1,16 +1,12 @@
+spring:
+  profiles:
+    active: ${ACTIVE_PROFILE:local}
+
 server:
   port: 8080
 
-spring:
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-
 jwt:
-  secret: bWFuZG9yaWFudGV4dHJlbWVseXNlY3VyZXQyMTEzJDEyMzQ1
+  secret: ${JWT_SECRET:bWFuZG9yaWFudGV4dHJlbWVseXNlY3VyZXQyMTEzJDEyMzQ1}
 
 springdoc:
   swagger-ui:
@@ -25,3 +21,42 @@ springdoc:
         url: /user-service/v3/api-docs
   api-docs:
     enabled: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    instance-id: gateway-instance-${random.uuid}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka
+  instance:
+    instance-id: gateway-instance-${random.uuid}
+    prefer-ip-address: true

@@ -1,18 +1,9 @@
+spring:
+  profiles:
+    active: ${ACTIVE_PROFILE:local}
+
 server:
   port: 8011
-
-spring:
-  datasource:
-    username: postgres
-    password: hgfhgf2233
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/userdb
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 springdoc:
   api-docs:
@@ -23,3 +14,52 @@ springdoc:
     path: /swagger-ui
   default-produces-media-type: application/json
   paths-to-match: /users/**
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/userdb
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    instance-id: user-instance-${random.uuid}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    username: ${SPRING_DATASOURCE_USER}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/userdb
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka
+  instance:
+    instance-id: user-instance-${random.uuid}
+    prefer-ip-address: true

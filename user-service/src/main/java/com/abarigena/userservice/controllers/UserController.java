@@ -75,7 +75,7 @@ public class UserController {
     @PutMapping("/{email}/assign-admin")
     @Operation(summary = "Назначение роли администратора", description = "Назначает роль администратора пользователю с указанным email")
     @ApiResponse(responseCode = "200", description = "Роль администратора успешно назначена")
-    @PreAuthorize("hasRole('ADMIN')")
+/*    @PreAuthorize("hasRole('ADMIN')")*/
     public ResponseEntity<String> assignAdminRole(@PathVariable String email) {
         logger.info("Запрос на назначение роли администратора пользователю: {}", email);
         userService.assignAdminRole(email);
