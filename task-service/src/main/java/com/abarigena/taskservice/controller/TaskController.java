@@ -1,6 +1,5 @@
 package com.abarigena.taskservice.controller;
 
-
 import com.abarigena.taskservice.dto.*;
 import com.abarigena.taskservice.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +21,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Контроллер для работы с задачами.
+ * Предоставляет API для создания, получения, обновления и удаления задач.
+ */
 @RestController
 @RequestMapping("/tasks")
 @Tag(name = "Задачи", description = "API для управления задачами")
@@ -33,6 +36,12 @@ public class TaskController {
         this.taskService = taskService;
     }
 
+    /**
+     * Получает все задачи с фильтрацией.
+     *
+     * @param filterRequest Параметры фильтрации задач
+     * @return список задач с возможностью пагинации
+     */
     @GetMapping
     @Operation(
             summary = "Получить все задачи с фильтрацией",
@@ -48,6 +57,12 @@ public class TaskController {
         return ResponseEntity.ok(tasks);
     }
 
+    /**
+     * Получает задачу по её ID.
+     *
+     * @param taskId ID задачи
+     * @return Задача с указанным ID
+     */
     @GetMapping("/{taskId}")
     @Operation(
             summary = "Получить задачу по ID",
@@ -63,6 +78,15 @@ public class TaskController {
         return ResponseEntity.ok(task);
     }
 
+    /**
+     * Получает задачи по ID автора.
+     * Задачи возвращаются с пагинацией и сортировкой.
+     *
+     * @param authorId ID автора
+     * @param page     Номер страницы
+     * @param size     Количество задач на странице
+     * @return Список задач автора
+     */
     @GetMapping("/by-author/{authorId}")
     @Operation(
             summary = "Получить задачи по ID автора",
@@ -89,6 +113,15 @@ public class TaskController {
         return ResponseEntity.ok(tasks);
     }
 
+    /**
+     * Получает задачи по ID исполнителя.
+     * Задачи возвращаются с пагинацией и сортировкой.
+     *
+     * @param assigneeId ID исполнителя
+     * @param page       Номер страницы
+     * @param size       Количество задач на странице
+     * @return Список задач исполнителя
+     */
     @GetMapping("/by-assignee/{assigneeId}")
     @Operation(
             summary = "Получить задачи по ID исполнителя",
@@ -115,6 +148,12 @@ public class TaskController {
         return ResponseEntity.ok(tasks);
     }
 
+    /**
+     * Создаёт новую задачу на основе переданных данных.
+     *
+     * @param request Данные для создания задачи
+     * @return Созданная задача
+     */
     @PostMapping("/create")
     @Operation(
             summary = "Создать новую задачу",
@@ -130,6 +169,13 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
     }
 
+    /**
+     * Обновляет задачу по её ID на основе переданных данных.
+     *
+     * @param taskId ID задачи
+     * @param request Данные для обновления задачи
+     * @return Обновленная задача
+     */
     @PutMapping("/{taskId}")
     @Operation(
             summary = "Обновить существующую задачу",
@@ -148,6 +194,13 @@ public class TaskController {
         return ResponseEntity.ok(updatedTask);
     }
 
+    /**
+     * Удаляет задачу по её ID.
+     * Доступно только администраторам или автору задачи.
+     *
+     * @param taskId ID задачи для удаления
+     * @return Ответ без содержимого (204)
+     */
     @DeleteMapping("/{taskId}")
     @Operation(
             summary = "Удалить задачу",
@@ -165,6 +218,13 @@ public class TaskController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Добавляет комментарий к задаче по её ID.
+     *
+     * @param taskId ID задачи
+     * @param request Данные комментария
+     * @return Созданный комментарий
+     */
     @PostMapping("/{taskId}/comments")
     @Operation(
             summary = "Добавить комментарий к задаче",
@@ -183,6 +243,12 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(comment);
     }
 
+    /**
+     * Получить все комментарии для задачи по её ID.
+     * Этот метод возвращает список комментариев, связанных с задачей, используя её уникальный идентификатор.
+     * Если задача с указанным ID не найдена, возвращается ошибка 404.
+     * @return ResponseEntity, содержащий список комментариев для задачи, если она найдена, и статус 200.
+     */
     @GetMapping("/{taskId}/comments")
     @Operation(
             summary = "Получить все комментарии для задачи",

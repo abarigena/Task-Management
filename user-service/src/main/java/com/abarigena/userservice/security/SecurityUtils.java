@@ -4,6 +4,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Утилитный компонент для работы с безопасностью.
+ * Этот компонент предоставляет методы для получения текущего ID пользователя и проверки его ролей.
+ */
 @Component
 public class SecurityUtils {
 

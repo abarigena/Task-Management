@@ -6,11 +6,22 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Конфигурация маршрутов для API Gateway.
+ * Определяет маршруты для разных сервисов и применяет фильтр аутентификации для защищенных эндпоинтов.
+ */
 @Configuration
 public class GatewayConfig {
     @Autowired
     private AuthenticationFilter filter;
 
+    /**
+     * Метод для настройки маршрутов в Gateway.
+     * Каждый маршрут может иметь фильтр аутентификации.
+     *
+     * @param builder Строитель маршрутов.
+     * @return {@link RouteLocator} Список настроенных маршрутов.
+     */
     @Bean
     public RouteLocator routes(RouteLocatorBuilder builder) {
         return builder.routes()
@@ -28,14 +39,12 @@ public class GatewayConfig {
                                 .stripPrefix(1))
                         .uri("lb://task-service"))
 
-                // Для документации API
                 .route("user-service-api-docs", r -> r
                         .path("/user-service/v3/api-docs")
                         .filters(f -> f
                                 .stripPrefix(1))
                         .uri("lb://user-service"))
 
-                // Для UI Swagger
                 .route("user-service-swagger-ui", r -> r
                         .path("/user-service/swagger-ui/**")
                         .filters(f -> f
@@ -52,7 +61,6 @@ public class GatewayConfig {
                         .filters(f -> f.filter(filter))
                         .uri("lb://task-service"))
 
-                // Auth Service Swagger
                 .route("auth-service-swagger-ui", r -> r.path("/auth-service/swagger-ui/**")
                         .uri("lb://authenthication-service/swagger-ui/"))
                 .route("auth-service-api-docs", r -> r.path("/auth-service/v3/api-docs/**")

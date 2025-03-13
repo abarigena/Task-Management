@@ -14,7 +14,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-
+/**
+ * Фильтр для аутентификации в Gateway, проверяющий наличие и валидность JWT токена.
+ * Если токен отсутствует или недействителен, запрос отклоняется с кодом состояния 401 (Unauthorized).
+ */
 @RefreshScope
 @Component
 public class AuthenticationFilter implements GatewayFilter {
@@ -26,22 +29,18 @@ public class AuthenticationFilter implements GatewayFilter {
     @Autowired
     private JwtUtils jwtUtils;
 
+    /**
+     * Метод фильтрации запросов. Проверяет наличие и валидность JWT токена для защищенных эндпоинтов.
+     *
+     * @param exchange Контекст запроса и ответа.
+     * @param chain Следующий фильтр в цепочке.
+     * @return {@link Mono<Void>} Возвращает Mono, завершение цепочки фильтрации.
+     */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
 
         logger.info("Запрос получен: {} {}", request.getMethod(), request.getURI().getPath());
-
-        /*String path = request.getURI().getPath();
-        if (path.contains("/v3/api-docs") ||
-                path.contains("/swagger-ui") ||
-                path.contains("/swagger-resources") ||
-                path.contains("/webjars") ||
-                path.contains("/task-service/v3/api-docs") ||
-                path.contains("/task-service/swagger-ui")) {
-            logger.debug("Skipping authentication for Swagger endpoint: {}", path);
-            return chain.filter(exchange);
-        }*/
 
         if (validator.isSecured.test(request)) {
             logger.debug("Обработка защищенного эндпоинта: {}", request.getURI().getPath());
@@ -73,6 +72,14 @@ public class AuthenticationFilter implements GatewayFilter {
         return chain.filter(exchange);
     }
 
+    /**
+     * Метод для добавления заголовков авторизации в запрос.
+     *
+     * @param exchange Контекст запроса и ответа.
+     * @param token JWT токен.
+     * @param chain Следующий фильтр в цепочке.
+     * @return {@link Mono<Void>} Возвращает Mono, завершение цепочки фильтрации.
+     */
     private Mono<Void> addAuthorizationHeaders(ServerWebExchange exchange, String token, GatewayFilterChain chain) {
         try {
             String userId = jwtUtils.getClaims(token).getSubject();
@@ -84,7 +91,7 @@ public class AuthenticationFilter implements GatewayFilter {
             ServerHttpRequest request = exchange.getRequest().mutate()
                     .header("X-User-Id", userId)
                     .header("X-User-Role", role)
-                    .header("Authorization", "Bearer " + token) // Сохраняем оригинальный токен
+                    .header("Authorization", "Bearer " + token)
                     .build();
 
             ServerWebExchange mutatedExchange = exchange.mutate().request(request).build();
@@ -97,6 +104,13 @@ public class AuthenticationFilter implements GatewayFilter {
         }
     }
 
+    /**
+     * Метод для обработки ошибок аутентификации, возвращает ответ с заданным кодом состояния.
+     *
+     * @param exchange Контекст запроса и ответа.
+     * @param httpStatus Статус ошибки.
+     * @return {@link Mono<Void>} Завершающий Mono.
+     */
     private Mono<Void> onError(ServerWebExchange exchange, HttpStatus httpStatus) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(httpStatus);
@@ -104,6 +118,12 @@ public class AuthenticationFilter implements GatewayFilter {
         return response.setComplete();
     }
 
+    /**
+     * Проверяет, присутствует ли заголовок "Authorization" в запросе.
+     *
+     * @param request Запрос.
+     * @return true, если заголовок отсутствует, false в противном случае.
+     */
     private boolean authMissing(ServerHttpRequest request) {
         return !request.getHeaders().containsKey("Authorization");
     }

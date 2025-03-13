@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Сущность комментария, которая хранит информацию о комментариях, прикрепленных к задаче.
+ * Каждый комментарий связан с конкретной задачей.
+ */
 @Entity
 @Table(name = "comments")
 @Data
@@ -25,6 +29,10 @@ public class Comment {
     @Column(nullable = false)
     private String authorId;
 
+    /**
+     * Задача, к которой относится комментарий.
+     * Ссылается на сущность Task.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
@@ -32,6 +40,10 @@ public class Comment {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * Метод, который вызывается перед сохранением сущности.
+     * Устанавливает текущую дату и время в поле createdAt.
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

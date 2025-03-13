@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Сервис для обработки аутентификации пользователя, включая регистрацию, вход и обновление токенов.
+ */
 @Service
 public class AuthService {
 
@@ -25,6 +28,11 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
     }
 
+    /**
+     * Регистрирует нового пользователя.
+     *
+     * @param request данные для регистрации пользователя.
+     */
     public void register(AuthRequest request) {
         logger.info("Начало процесса регистрации пользователя с email: {}", request.getEmail());
 
@@ -40,6 +48,12 @@ public class AuthService {
         }
     }
 
+    /**
+     * Выполняет вход в систему и генерирует токены доступа и обновления.
+     *
+     * @param request данные для аутентификации пользователя.
+     * @return объект {@link AuthResponse} с токенами доступа и обновления.
+     */
     public AuthResponse login(LoginRequest request) {
         logger.info("Попытка входа пользователя: {}", request.getEmail());
 
@@ -68,6 +82,12 @@ public class AuthService {
         return new AuthResponse(accessToken, refreshToken);
     }
 
+    /**
+     * Обновляет токен доступа на основе токена обновления.
+     *
+     * @param refreshToken токен обновления.
+     * @return объект {@link AuthResponse} с новыми токенами доступа и обновления.
+     */
     public AuthResponse refreshToken(String refreshToken) {
         logger.info("Запрос на обновление токена");
 

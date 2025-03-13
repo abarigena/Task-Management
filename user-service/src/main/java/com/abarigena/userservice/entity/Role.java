@@ -2,6 +2,10 @@ package com.abarigena.userservice.entity;
 
 import jakarta.persistence.*;
 
+/**
+ * Класс, представляющий роль пользователя в системе.
+ * Роли могут быть использованы для определения прав доступа.
+ */
 @Entity
 @Table(name = "roles")
 public class Role {
@@ -10,6 +14,9 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Название роли, которое может быть одним из значений из перечисления {@link RoleType}.
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
     private RoleType name;

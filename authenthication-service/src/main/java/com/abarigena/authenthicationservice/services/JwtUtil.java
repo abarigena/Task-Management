@@ -14,6 +14,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Утилитный класс для работы с JWT токенами.
+ * Включает методы для генерации токенов, проверки их срока действия и извлечения данных.
+ */
 @Service
 public class JwtUtil {
 
@@ -32,6 +36,12 @@ public class JwtUtil {
         this.key = key;
     }
 
+    /**
+     * Извлекает данные (claims) из JWT токена.
+     *
+     * @param token JWT токен.
+     * @return объект {@link Claims} с данными из токена.
+     */
     public Claims getClaims(String token) {
         logger.debug("Получение данных из JWT токена");
         try {
@@ -46,10 +56,22 @@ public class JwtUtil {
         }
     }
 
+    /**
+     * Возвращает дату истечения срока действия токена.
+     *
+     * @param token JWT токен.
+     * @return дата истечения срока действия токена.
+     */
     public Date getExpirationDate(String token) {
         return getClaims(token).getExpiration();
     }
 
+    /**
+     * Проверяет, истек ли срок действия токена.
+     *
+     * @param token JWT токен.
+     * @return true, если токен истек, иначе false.
+     */
     public boolean isExpired(String token) {
         try {
             boolean expired = getExpirationDate(token).before(new Date());
@@ -61,6 +83,14 @@ public class JwtUtil {
         }
     }
 
+    /**
+     * Генерирует новый JWT токен.
+     *
+     * @param userId идентификатор пользователя.
+     * @param role роль пользователя.
+     * @param tokenType тип токена (например, "ACCESS" или "REFRESH").
+     * @return сгенерированный JWT токен.
+     */
     public String generate(String userId, String role, String tokenType) {
         logger.info("Генерация {} токена для пользователя: {}", tokenType, userId);
 

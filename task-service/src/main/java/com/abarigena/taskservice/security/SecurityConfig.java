@@ -9,6 +9,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Конфигурация веб-безопасности.
+ * <p>
+ * Настроены фильтры, разрешение на доступ к Swagger UI и документации,
+ * а также аутентификация для всех остальных запросов.
+ * </p>
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
@@ -21,11 +28,20 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/swagger-resources/**",
-            "/webjars/**"/*,
-            "/task-service/v3/api-docs",
-            "/task-service/swagger-ui"*/
+            "/webjars/**"
     };
 
+    /**
+     * Метод, который настраивает цепочку фильтров для обработки HTTP-запросов.
+     * <p>
+     * Настраивает управление сессиями для stateless аутентификации
+     * и настраивает доступ к Swagger-ресурсам.
+     * </p>
+     *
+     * @param http объект HttpSecurity для настройки безопасности
+     * @return настроенная цепочка фильтров безопасности
+     * @throws Exception исключение, если происходит ошибка при настройке безопасности
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -33,7 +49,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
-//                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(formLogin -> formLogin.disable())
@@ -44,6 +59,11 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Бин для фильтра аутентификации шлюза.
+     *
+     * @return экземпляр фильтра аутентификации шлюза
+     */
     @Bean
     public GatewayAuthenticationFilter gatewayAuthenticationFilter() {
         return new GatewayAuthenticationFilter();

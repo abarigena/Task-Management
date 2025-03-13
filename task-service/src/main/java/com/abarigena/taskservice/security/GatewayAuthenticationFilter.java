@@ -19,6 +19,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+/**
+ * Фильтр для аутентификации запросов в шлюзе.
+ * Фильтрует запросы и устанавливает аутентификацию в контексте безопасности на основе заголовков.
+ * <p>
+ * Этот фильтр проверяет заголовки запросов для межсервисной аутентификации и аутентификации пользователя.
+ * Если заголовки присутствуют и корректны, то устанавливается соответствующий объект аутентификации в контексте безопасности.
+ * </p>
+ */
 public class GatewayAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(GatewayAuthenticationFilter.class);
@@ -26,6 +34,15 @@ public class GatewayAuthenticationFilter extends OncePerRequestFilter {
     private static final String USER_ID_HEADER = "X-User-Id";
     private static final String USER_ROLE_HEADER = "X-User-Role";
 
+    /**
+     * Метод, который определяет, следует ли пропускать фильтрацию для текущего запроса.
+     * <p>
+     * Запросы к Swagger UI и документации API пропускаются.
+     * </p>
+     *
+     * @param request HTTP-запрос
+     * @return true, если фильтрация не требуется, иначе false
+     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
@@ -34,40 +51,28 @@ public class GatewayAuthenticationFilter extends OncePerRequestFilter {
                 path.startsWith("/swagger-ui") ||
                 path.contains("swagger-ui.html") ||
                 path.contains("swagger-resources") ||
-                path.startsWith("/webjars") /*||
-                path.contains("/task-service/v3/api-docs") ||
-                path.contains("/task-service/swagger-ui")*/;
+                path.startsWith("/webjars");
     }
 
+    /**
+     * Основной метод фильтрации запроса, который устанавливает аутентификацию для запроса
+     * на основе заголовков.
+     * <p>
+     * Проверяет наличие заголовков аутентификации и создает объект аутентификации,
+     * который затем устанавливается в контексте безопасности.
+     * </p>
+     *
+     * @param request HTTP-запрос
+     * @param response HTTP-ответ
+     * @param filterChain Цепочка фильтров для дальнейшей обработки запроса
+     * @throws ServletException исключение, если происходит ошибка в фильтрации
+     * @throws IOException исключение, если происходит ошибка ввода/вывода
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         logger.debug("Обработка запроса к: {}", request.getRequestURI());
-
-        /*String path = request.getRequestURI();
-        // Если это запрос к документации Swagger, и заголовки отсутствуют, добавляем их сами
-        if ((path.contains("/v3/api-docs") || path.contains("/swagger-ui")) &&
-                request.getHeader(USER_ID_HEADER) == null) {
-
-            logger.info("Добавление заголовков аутентификации для Swagger");
-
-            // Используем HttpServletRequestWrapper для добавления заголовков
-            HttpServletRequest modifiedRequest = new HttpServletRequestWrapper(request) {
-                @Override
-                public String getHeader(String name) {
-                    if (USER_ID_HEADER.equals(name)) {
-                        return "swagger-user";
-                    } else if (USER_ROLE_HEADER.equals(name)) {
-                        return "ROLE_ADMIN";
-                    }
-                    return super.getHeader(name);
-                }
-            };
-
-            filterChain.doFilter(modifiedRequest, response);
-            return;
-        }*/
 
         // Проверяем заголовок для межсервисной коммуникации
         String serviceAuth = request.getHeader("X-Service-Auth");

@@ -3,12 +3,18 @@ package com.abarigena.userservice.security;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
+/**
+ * Конфигурация безопасности, включающая методовую безопасность.
+ * <p>
+ * Включает активацию аннотаций для метода безопасности, таких как @PreAuthorize, @Secured и @RolesAllowed.
+ * </p>
+ */
 @Configuration
 @EnableMethodSecurity(
-        prePostEnabled = true,   // Активация @PreAuthorize, @PostAuthorize
-        securedEnabled = true,   // Активация @Secured
-        jsr250Enabled = true     // Активация @RolesAllowed
+        prePostEnabled = true,
+        securedEnabled = true,
+        jsr250Enabled = true
 )
 public class MethodSecurityConfig {
-    // Пустая конфигурация, включает защиту на уровне методов
+
 }

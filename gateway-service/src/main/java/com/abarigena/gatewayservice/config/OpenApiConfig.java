@@ -13,7 +13,7 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .servers(List.of(
-                        new Server().url("/")  // Базовый путь для Gateway
+                        new Server().url("/")
                 ));
     }
 }

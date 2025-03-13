@@ -10,7 +10,10 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 
-
+/**
+ * Утилитный класс для работы с JWT токенами.
+ * Обрабатывает парсинг токенов и проверку их срока годности.
+ */
 @Service
 public class JwtUtils {
     @Value("${jwt.secret}")
@@ -23,10 +26,22 @@ public class JwtUtils {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
+    /**
+     * Извлекает данные из JWT токена.
+     *
+     * @param token JWT токен.
+     * @return {@link Claims} Содержимое токена.
+     */
     public Claims getClaims(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
+    /**
+     * Проверяет, не истек ли срок действия токена.
+     *
+     * @param token JWT токен.
+     * @return true, если токен истек, иначе false.
+     */
     public boolean isExpired(String token) {
         try {
             return getClaims(token).getExpiration().before(new Date());

@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 
 import java.util.Set;
 
+/**
+ * Класс, представляющий пользователя в системе.
+ * Содержит информацию о пользователе, такую как email, имя пользователя, пароль и его роли.
+ */
 @Entity
 @Table(name = "users")
 public class User {
@@ -21,6 +25,10 @@ public class User {
     @Column(nullable = false)
     private String username;
 
+    /**
+     * Множество ролей пользователя.
+     * Роли пользователя позволяют управлять его правами доступа.
+     */
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",

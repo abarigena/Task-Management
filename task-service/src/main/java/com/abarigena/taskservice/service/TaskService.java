@@ -1,11 +1,11 @@
 package com.abarigena.taskservice.service;
 
+import com.abarigena.dto.exception.ResourceNotFoundException;
+import com.abarigena.dto.exception.UnauthorizedException;
 import com.abarigena.taskservice.client.UserServiceClient;
 import com.abarigena.taskservice.dto.*;
 import com.abarigena.taskservice.entity.Comment;
 import com.abarigena.taskservice.entity.Task;
-import com.abarigena.taskservice.exception.ResourceNotFoundException;
-import com.abarigena.taskservice.exception.UnauthorizedException;
 import com.abarigena.taskservice.repository.CommentRepository;
 import com.abarigena.taskservice.repository.TaskRepository;
 import com.abarigena.taskservice.security.SecurityUtils;
@@ -21,6 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Сервис для работы с задачами.
+ * Предоставляет методы для создания, обновления, удаления задач, а также для работы с комментариями.
+ */
 @Service
 @Slf4j
 public class TaskService {
@@ -39,6 +43,12 @@ public class TaskService {
         this.userServiceClient = userServiceClient;
     }
 
+    /**
+     * Находит задачи по фильтрам.
+     *
+     * @param filterRequest запрос с фильтрами для поиска задач.
+     * @return страница задач, удовлетворяющих фильтрам.
+     */
     @Transactional(readOnly = true)
     public Page<TaskDto> findTasks(TaskFilterRequest filterRequest) {
 
@@ -64,6 +74,13 @@ public class TaskService {
         return tasks.map(this::convertToTaskDto);
     }
 
+    /**
+     * Находит задачи по ID автора.
+     *
+     * @param authorId ID автора.
+     * @param pageable параметры пагинации.
+     * @return страница задач, принадлежащих автору.
+     */
     @Transactional(readOnly = true)
     public Page<TaskDto> findTasksByAuthor(String authorId, Pageable pageable) {
         log.info("Поиск задач по автору: {}", authorId);
@@ -72,6 +89,13 @@ public class TaskService {
         return tasks.map(this::convertToTaskDto);
     }
 
+    /**
+     * Находит задачи по ID исполнителя.
+     *
+     * @param assigneeId ID исполнителя.
+     * @param pageable параметры пагинации.
+     * @return страница задач, назначенных исполнителю.
+     */
     @Transactional(readOnly = true)
     public Page<TaskDto> findTasksByAssignee(String assigneeId, Pageable pageable) {
         log.info("Поиск задач по исполнителю: {}", assigneeId);
@@ -80,6 +104,12 @@ public class TaskService {
         return tasks.map(this::convertToTaskDto);
     }
 
+    /**
+     * Находит задачу по ID.
+     *
+     * @param taskId ID задачи.
+     * @return DTO задачи.
+     */
     @Transactional(readOnly = true)
     public TaskDto findTaskById(Long taskId) {
         log.info("Поиск задачи по ID: {}", taskId);
@@ -88,6 +118,12 @@ public class TaskService {
         return convertToTaskDto(task);
     }
 
+    /**
+     * Создает новую задачу.
+     *
+     * @param request данные для создания задачи.
+     * @return DTO созданной задачи.
+     */
     @Transactional
     public TaskDto createTask(CreateTaskRequest request) {
         String currentUserId = SecurityUtils.getCurrentUserId();
@@ -117,6 +153,13 @@ public class TaskService {
         return convertToTaskDto(savedTask);
     }
 
+    /**
+     * Обновляет задачу по ID.
+     *
+     * @param taskId ID задачи.
+     * @param request данные для обновления задачи.
+     * @return DTO обновленной задачи.
+     */
     @Transactional
     public TaskDto updateTask(Long taskId, UpdateTaskRequest request) {
         String currentUserId = SecurityUtils.getCurrentUserId();
@@ -176,6 +219,11 @@ public class TaskService {
         return convertToTaskDto(updatedTask);
     }
 
+    /**
+     * Удаляет задачу по ID.
+     *
+     * @param taskId ID задачи.
+     */
     @Transactional
     public void deleteTask(Long taskId) {
         String currentUserId = SecurityUtils.getCurrentUserId();
@@ -196,6 +244,13 @@ public class TaskService {
         }
     }
 
+    /**
+     * Добавляет новый комментарий к задаче.
+     *
+     * @param taskId идентификатор задачи, к которой добавляется комментарий.
+     * @param request объект с данными для создания комментария.
+     * @return DTO комментария, содержащий информацию о добавленном комментарии.
+     */
     @Transactional
     public CommentDto addComment(Long taskId, CreateCommentRequest request) {
         String currentUserId = SecurityUtils.getCurrentUserId();
@@ -215,6 +270,12 @@ public class TaskService {
         return convertToCommentDto(savedComment);
     }
 
+    /**
+     * Получает список комментариев для задачи.
+     *
+     * @param taskId идентификатор задачи, для которой нужно получить комментарии.
+     * @return список DTO комментариев, привязанных к задаче.
+     */
     @Transactional(readOnly = true)
     public List<CommentDto> getTaskComments(Long taskId) {
         log.info("Получение комментариев для задачи ID: {}", taskId);
@@ -229,6 +290,13 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Получает задачу по идентификатору.
+     *
+     * @param taskId идентификатор задачи.
+     * @return задачу с заданным идентификатором.
+     * @throws ResourceNotFoundException если задача с заданным идентификатором не найдена.
+     */
     private Task getTaskById(Long taskId) {
         log.debug("Поиск задачи с ID: {}", taskId);
 
@@ -239,6 +307,12 @@ public class TaskService {
                 });
     }
 
+    /**
+     * Преобразует задачу в DTO.
+     *
+     * @param task задача, которую нужно преобразовать.
+     * @return DTO задачи.
+     */
     private TaskDto convertToTaskDto(Task task) {
         log.debug("Конвертация задачи в DTO: {}", task.getId());
 
@@ -271,6 +345,12 @@ public class TaskService {
                 .build();
     }
 
+    /**
+     * Преобразует комментарий в DTO.
+     *
+     * @param comment комментарий, который нужно преобразовать.
+     * @return DTO комментария.
+     */
     private CommentDto convertToCommentDto(Comment comment) {
         log.debug("Конвертация комментария в DTO: {}", comment.getId());
         String authorUsername = getUsernameById(comment.getAuthorId());
@@ -284,6 +364,12 @@ public class TaskService {
                 .build();
     }
 
+    /**
+     * Получает имя пользователя по его идентификатору.
+     *
+     * @param userId идентификатор пользователя.
+     * @return имя пользователя.
+     */
     private String getUsernameById(String userId) {
         log.debug("Получение имени пользователя по ID: {}", userId);
 

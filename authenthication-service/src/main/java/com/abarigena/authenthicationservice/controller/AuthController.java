@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Контроллер для обработки запросов аутентификации, включая регистрацию, вход и обновление токенов.
+ */
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Аутентификация", description = "API для регистрации, входа и обновления токенов")
@@ -25,6 +28,12 @@ public class AuthController {
         this.authService = authService;
     }
 
+    /**
+     * Регистрация нового пользователя.
+     *
+     * @param request данные для регистрации пользователя.
+     * @return ResponseEntity с сообщением об успешной регистрации.
+     */
     @PostMapping(value = "/register")
     @Operation(
             summary = "Регистрация пользователя",
@@ -40,6 +49,12 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully");
     }
 
+    /**
+     * Вход в систему.
+     *
+     * @param request данные для аутентификации пользователя.
+     * @return ResponseEntity с токенами доступа и обновления.
+     */
     @PostMapping(value = "/login")
     @Operation(
             summary = "Вход в систему",
@@ -54,6 +69,12 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
+    /**
+     * Обновление токена доступа.
+     *
+     * @param token токен обновления.
+     * @return ResponseEntity с новыми токенами доступа и обновления.
+     */
     @PostMapping(value = "/refresh")
     @Operation(
             summary = "Обновление токена",

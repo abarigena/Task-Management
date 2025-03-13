@@ -17,6 +17,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Сервис для управления пользователями.
+ * Включает методы для создания пользователей, поиска по email, назначения ролей и получения информации о пользователях.
+ */
 @Service
 public class UserService {
 
@@ -26,6 +30,10 @@ public class UserService {
     @Autowired
     private RoleRepository roleRepository;
 
+    /**
+     * Инициализирует роли по умолчанию, если они еще не созданы.
+     * Роли администратора и пользователя создаются при запуске приложения.
+     */
     @PostConstruct
     public void initRoles() {
         if (roleRepository.count() == 0) {
@@ -40,6 +48,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Создает нового пользователя на основе переданных данных.
+     *
+     * @param userDto данные для создания нового пользователя.
+     * @return {@link UserDto} созданного пользователя.
+     * @throws RuntimeException если email или username уже заняты.
+     */
     @Transactional
     public UserDto save(UserDto userDto) {
         // Проверка существования пользователя
@@ -68,6 +83,13 @@ public class UserService {
         return convertToDto(savedUser);
     }
 
+    /**
+     * Находит пользователя по его email.
+     *
+     * @param email email пользователя.
+     * @return {@link UserDto} найденного пользователя.
+     * @throws RuntimeException если пользователь не найден.
+     */
     public UserDto findByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -75,6 +97,12 @@ public class UserService {
         return convertToDto(user);
     }
 
+    /**
+     * Преобразует {@link User} в {@link UserDto}.
+     *
+     * @param user пользователь, который будет преобразован.
+     * @return {@link UserDto} с данными пользователя.
+     */
     private UserDto convertToDto(User user) {
         Set<String> roles = user.getRoles().stream()
                 .map(role -> role.getName().name())
@@ -89,6 +117,12 @@ public class UserService {
                 .build();
     }
 
+    /**
+     * Назначает роль администратора пользователю по email.
+     *
+     * @param email email пользователя, которому будет назначена роль администратора.
+     * @throws RuntimeException если пользователь или роль администратора не найдены.
+     */
     @Transactional
     public void assignAdminRole(String email) {
         User user = userRepository.findByEmail(email)
@@ -104,6 +138,13 @@ public class UserService {
         userRepository.save(user);
     }
 
+    /**
+     * Находит информацию о пользователе по его ID.
+     *
+     * @param userId ID пользователя.
+     * @return {@link UserInfoDto} с информацией о пользователе.
+     * @throws UsernameNotFoundException если пользователь с данным ID не найден.
+     */
     public UserInfoDto findById(String userId) {
         User user = userRepository.findById(Long.valueOf(userId))
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден с ID: " + userId));
@@ -111,6 +152,13 @@ public class UserService {
         return new UserInfoDto(String.valueOf(user.getId()), user.getUsername(), user.getEmail());
     }
 
+    /**
+     * Возвращает текущего пользователя по его ID.
+     *
+     * @param userId ID пользователя.
+     * @return {@link UserDto} с данными текущего пользователя.
+     * @throws UsernameNotFoundException если пользователь не найден.
+     */
     public UserDto getCurrentUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден с ID: " + userId));
