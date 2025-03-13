@@ -49,14 +49,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
-                        /*// Разрешаем сервисной роли доступ к API регистрации и поиска пользователей
-                        .requestMatchers("/users").hasAnyRole("SERVICE", "ADMIN")
-                        .requestMatchers("/users/{email}").hasAnyRole("SERVICE", "ADMIN")
-                        .requestMatchers("/info/{userId}").hasAnyRole("SERVICE", "ADMIN")
-                        .requestMatchers("/users/profile").authenticated()
-                        // Защищенные эндпоинты
-                        .requestMatchers("/users/secured/**").hasRole("ADMIN")
-                        // Все остальные запросы требуют аутентификации*/
                         .anyRequest().authenticated()
                 )
                 .formLogin(formLogin -> formLogin.disable())
