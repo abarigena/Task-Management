@@ -1,6 +1,10 @@
-com\abarigena\dto\AuthRequestDto.class
+com\abarigena\dto\exception\UnauthorizedException.class
+com\abarigena\dto\LoginRequest.class
+com\abarigena\dto\UserInfoDto.class
+com\abarigena\dto\AuthResponse.class
 com\abarigena\dto\UserDto.class
-com\abarigena\dto\AuthResponseDto.class
-com\abarigena\dto\RegisterRequestDto.class
+com\abarigena\dto\exception\ErrorResponse.class
+com\abarigena\dto\exception\ResourceNotFoundException.class
 com\abarigena\dto\AuthRequest.class
-com\abarigena\dto\EmailAuthRequestDto.class
+com\abarigena\dto\exception\GlobalExceptionHandler.class
+com\abarigena\dto\UserDto$Builder.class

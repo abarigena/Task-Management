@@ -1,6 +1,9 @@
-E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\AuthResponseDto.java
+E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\exception\GlobalExceptionHandler.java
+E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\exception\UnauthorizedException.java
+E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\UserInfoDto.java
 E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\AuthRequest.java
-E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\AuthRequestDto.java
+E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\AuthResponse.java
 E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\UserDto.java
-E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\RegisterRequestDto.java
-E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\EmailAuthRequestDto.java
+E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\exception\ErrorResponse.java
+E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\exception\ResourceNotFoundException.java
+E:\Работа\Тестовое задание в efffective mobile\опять\Task-Management\task-common-dto\src\main\java\com\abarigena\dto\LoginRequest.java

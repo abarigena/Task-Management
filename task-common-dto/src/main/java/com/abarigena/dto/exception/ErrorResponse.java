@@ -1,4 +1,4 @@
-package com.abarigena.taskservice.exception;
+package com.abarigena.dto.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
